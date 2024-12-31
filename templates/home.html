@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Personalized News Summarizer</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome to Personalized News Summarizer</h1>
+        <p>Your gateway to concise and tailored news summaries.</p>
+    </header>
+    <main>
+        <form method="POST" action="/summarize">
+            <label for="zone">Select Your Preferred Zone:</label>
+            <select name="zone" id="zone" required>
+                <option value="">-- Select Zone --</option>
+                <option value="tech">Technology</option>
+                <option value="business">Business</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="economy">Economy</option>
+                <option value="health">Health</option>
+                <option value="science">Science</option>
+            </select>
+            
+            <label for="language">Select Your Preferred Language:</label>
+            <select name="language" id="language" required>
+                <option value="">-- Select Language --</option>
+                <option value="en">English</option>
+                <option value="fr">French</option>
+                <option value="es">Spanish</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+            </select>
+            
+            <button type="submit">Proceed</button>
+        </form>
+    </main>
+    <footer>
+        <p>&copy; 2024 Personalized News Summarizer</p>
+    </footer>
+</body>
+</html>

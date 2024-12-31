@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summarized News</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Summarized News for Zone: {{ zone }}</h1>
+    </header>
+    <main>
+        {% if summaries %}
+            <ul id="summarized-news">
+                {% for article in summaries %}
+                    <li>
+                        <h3>{{ article.title }}</h3>
+                        <p>{{ article.summary }}</p>
+                        <a href="{{ article.url }}" target="_blank">
+                            <button>Read More</button>
+                        </a>
+                        <a href="https://wa.me/?text={{ article.title }} - {{ article.url }}" target="_blank">
+                            <button>Share on WhatsApp</button>
+                        </a>
+                        <button onclick="bookmarkArticle('{{ article.title }}', '{{ article.url }}')">Bookmark</button>
+                    </li>
+                {% endfor %}
+            </ul>
+            <button id="voice-summarize-btn">Voice Activated Summaries</button>
+            <!-- Next Page Button -->
+            <a href="{{ url_for('summarize', zone=zone, language=language, page=next_page) }}">
+                <button>Next Summaries</button>
+            </a>
+            <a href="{{ url_for('summarize', zone=zone, language=language, page=prev_page) }}">
+                <button>Previous Summaries</button>
+            </a>
+        {% else %}
+            <p>No articles found for the selected zone and language.</p>
+        {% endif %}
+    </main>
+    <footer>
+        <p>&copy; 2024 Personalized News Summarizer</p>
+        <a href="/analytics">View Analytics</a>
+    </footer>
+    <script>
+        const voiceButton = document.getElementById("voice-summarize-btn");
+        const speech = new SpeechSynthesisUtterance();
+        let isSpeaking = false;
+
+        const readSummaries = () => {
+            if (isSpeaking) {
+                window.speechSynthesis.cancel();
+                isSpeaking = false;
+                voiceButton.innerText = "Voice Activated Summaries";
+                return;
+            }
+            const headlines = document.querySelectorAll("h3");
+            const summaries = document.querySelectorAll("p");
+            let textToSpeak = "";
+            headlines.forEach((headline, index) => {
+                textToSpeak += `Headline: ${headline.innerText}. Summary: ${summaries[index].innerText}. `;
+            });
+            speech.text = textToSpeak;
+            window.speechSynthesis.speak(speech);
+            isSpeaking = true;
+            voiceButton.innerText = "Stop Summarizing";
+        };
+
+        if (voiceButton) {
+            voiceButton.addEventListener("click", readSummaries);
+        }
+
+        const bookmarkArticle = (title, url) => {
+            fetch('/bookmark', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, url })
+            }).then(() => {
+                alert("Article bookmarked!");
+            }).catch(err => {
+                console.error("Error bookmarking article:", err);
+            });
+        };
+    </script>
+</body>
+</html>

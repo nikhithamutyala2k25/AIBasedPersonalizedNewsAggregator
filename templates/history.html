@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading History</title>
+</head>
+<body>
+    <h1>Your Reading History</h1>
+    <ul>
+        {% for article in history %}
+            <li>
+                <h3>{{ article.title }}</h3>
+                <p>{{ article.timestamp }}</p>
+                <a href="{{ article.url }}" target="_blank">Read Full Article</a>
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="/">Back to Home</a>
+</body>
+</html>

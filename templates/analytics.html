@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Analytics Dashboard</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Summary Views</h2>
+            <p>Total summaries viewed: {{ analytics.summaries_viewed }}</p>
+        </section>
+        <section>
+            <h2>Bookmarks Added</h2>
+            <p>Total bookmarks added: {{ analytics.bookmarks_added }}</p>
+        </section>
+        <footer>
+            <p>&copy; 2024 Personalized News Summarizer</p>
+            <a href="/">Back to Home</a>
+        </footer>
+    </main>
+</body>
+</html>
