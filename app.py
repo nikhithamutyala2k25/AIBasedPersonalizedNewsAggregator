@@ -7,6 +7,7 @@ import os
 import datetime
 from dotenv import load_dotenv
 from functools import lru_cache
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -18,8 +19,6 @@ app.secret_key = os.getenv('FLASK_SECRET_KEY')  # Secret key from .env
 api_key = os.getenv('NEWS_API_KEY')
 news_api_url = os.getenv('NEWS_API_URL')
 
-
-# Define available zones with their keywords for NewsAPI
 zones = {
     'tech': ['technology'],
     'business': ['business'],
@@ -35,7 +34,6 @@ translator = Translator()
 
 # Function to clean unwanted text
 def clean_article_content(content):
-    # Removing unwanted patterns (cookie consent, etc.)
     content = re.sub(r'If you click.*will also store and/or access information.*', '', content)
     content = re.sub(r'[\n\r]+', ' ', content)  # Remove unnecessary newlines and carriage returns
     content = re.sub(r'<[^>]*>', '', content)  # Remove HTML tags (if any)
@@ -45,11 +43,6 @@ def clean_article_content(content):
     content = re.sub(r'www\.\S+', '', content)
     content = re.sub(r'\b…$', '', content)
     content = re.sub(r'[^\x00-\x7F]+', '', content)
-    content = re.sub(r'[\n\r]+', ' ', content)  # Remove unnecessary newlines
-    content = re.sub(r'<[^>]*>', '', content)  # Remove HTML tags
-    content = re.sub(r'\[.*?\]', '', content)  # Remove text in square brackets
-    content = re.sub(r'[^\x00-\x7F]+', '', content)  # Remove non-ASCII characters
-    content = re.sub(r'\b\S+@\S+\b', '', content)  # Remove email addresses
     return content
 
 # Function to summarize an article
@@ -123,6 +116,13 @@ def summarize():
     if not zone or not language:
         return render_template('home.html', error="Please select both a zone and a language.")
     
+    # Reset summaries when zone changes
+    if 'summaries' in session and zone != session.get('current_zone'):
+        session['summaries'] = {}  # Reset summaries for new zone
+    
+    # Store the current zone in session to track changes
+    session['current_zone'] = zone
+
     # Check if summaries for the current zone and page already exist in session
     if 'summaries' in session and session['summaries'].get(f'{zone}_page_{page}'):
         summaries = session['summaries'][f'{zone}_page_{page}']
@@ -139,11 +139,10 @@ def summarize():
                     'summary': summary,
                     'url': article['url']
                 })
-                # Track activity in session
-                if 'history' not in session:
-                    session['history'] = []
-                session['history'].append({'title': article['title'], 'url': article['url']})
-                session['analytics']['summaries_viewed'] += 1
+                # Track activity in session without counting duplicates
+                if article['url'] not in [item['url'] for item in session['history']]:
+                    session['history'].append({'title': article['title'], 'url': article['url']})
+                    session['analytics']['summaries_viewed'] += 1
         
         # Store summaries in the session for the current zone and page
         if 'summaries' not in session:
@@ -164,17 +163,48 @@ def bookmark():
     url = data.get('url')
     
     if title and url:
+        # Define a maximum number of bookmarks you want to keep
+        max_bookmarks = 5
+
         # Add bookmark to session
         if 'bookmarks' not in session:
             session['bookmarks'] = []
-        session['bookmarks'].append({'title': title, 'url': url})
-        session['analytics']['bookmarks_added'] += 1
-        session.modified = True  # Ensure session updates are saved
+
+        # Prevent duplicates by checking if the bookmark already exists
+        if url not in [bookmark['url'] for bookmark in session['bookmarks']]:
+            # Check if the number of bookmarks exceeds the max limit
+            if len(session['bookmarks']) >= max_bookmarks:
+                # Remove the oldest bookmark (like a stack)
+                session['bookmarks'].pop(0)
+
+            # Add the new bookmark to the list
+            session['bookmarks'].append({'title': title, 'url': url})
+            session['analytics']['bookmarks_added'] += 1
+        
+        # Mark session as modified to ensure it gets saved
+        session.modified = True
+        app.logger.debug(f"Added bookmark: {title} - {url}")
+        
     return ("", 204)  # No content response
 
 @app.route('/analytics')
 def analytics_dashboard():
     analytics = session.get('analytics', {'summaries_viewed': 0, 'bookmarks_added': 0})
-    return render_template('analytics.html', analytics=analytics)
+    bookmarks = session.get('bookmarks', [])
+    app.logger.debug(f"Bookmarks: {bookmarks}")  # Debugging log
+    return render_template('analytics.html', analytics=analytics, bookmarks=bookmarks)
+
+@app.route('/clear_bookmarks')
+def clear_bookmarks():
+    session.pop('bookmarks', None)  # Removes 'bookmarks' key from session
+    session.pop('analytics', None)  # Removes 'analytics' key from session
+    session.modified = True  # Mark session as modified
+    return redirect(url_for('analytics_dashboard'))  # Redirect to analytics page or another page
+
+@app.route('/clear_session')
+def clear_session():
+    session.clear()  # Clears all session data
+    return redirect(url_for('home')) 
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
