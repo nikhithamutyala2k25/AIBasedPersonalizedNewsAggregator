@@ -4,25 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analytics Dashboard</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px 0;
+        }
+        header h1 {
+            font-size: 2.5rem;
+        }
+        .card-body {
+            font-size: 1.2rem;
+        }
+        .card-footer {
+            text-align: center;
+        }
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+        footer a {
+            color: #f8f9fa;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <header>
+    <header class="text-center">
         <h1>Analytics Dashboard</h1>
     </header>
-    <main>
-        <section>
-            <h2>Summary Views</h2>
-            <p>Total summaries viewed: {{ analytics.summaries_viewed }}</p>
-        </section>
-        <section>
-            <h2>Bookmarks Added</h2>
-            <p>Total bookmarks added: {{ analytics.bookmarks_added }}</p>
-        </section>
-        <footer>
-            <p>&copy; 2024 Personalized News Summarizer</p>
-            <a href="/">Back to Home</a>
-        </footer>
-    </main>
+    <div class="container my-5">
+        <div class="row">
+            <!-- Summary Views Section -->
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title">Summary Views</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Total summaries viewed: <strong>{{ analytics.summaries_viewed }}</strong></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Bookmarks Added Section -->
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title">Bookmarks Added</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Total bookmarks added: <strong>{{ analytics.bookmarks_added }}</strong></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Bookmarked Articles Section -->
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="card-title">Bookmarked Articles</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            {% for bookmark in bookmarks %}
+                                <li class="list-group-item">
+                                    <h6>{{ bookmark.title }}</h6>
+                                    <a href="{{ bookmark.url }}" target="_blank" class="btn btn-outline-primary btn-sm">Read Full Article</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2024 Personalized News Summarizer | <a href="/">Back to Home</a></p>
+    </footer>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
 </body>
-</html>
+</html> 
